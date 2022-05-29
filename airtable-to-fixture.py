@@ -9,7 +9,6 @@
 import os
 from dotenv import load_dotenv
 from airtable import Airtable
-from pprint import pprint
 import json
 
 # Load everything we need from the .env we made.
@@ -40,8 +39,6 @@ jsonObject = json.dumps(data, indent = 2)
 with open (rawFile,"w") as outfile:
 	outfile.write(jsonObject)
 
-
-
 # Initializing an ID variable that will be used for the "pk" fixture value.
 id = 0
 
@@ -55,11 +52,15 @@ dataList = []
 # Okay, so now we have a list. Some of the values (like "fields") are dictionaries within the list.
 for record in range(len(data)):
 	id += 1 # Add one to ID for the 'pk' value
+	fieldRecord = data[record]["fields"]
+        # We also need to change the key names to something Django will like.
+        # (Yes, I know, nested recursion is bad practice)
+	fieldRecord = dict((key.lower().replace(" ","_"), value) for key, value in fieldRecord.items())
         # Creating a temporary dictionary with the model name, pk/id, and the fields we got from Airtable
 	tempDict = {
 		"model": modelName,
 		"pk": id,
-		"fields": data[record]["fields"]
+		"fields": fieldRecord
 	}
 	# Append the temporary dictionary to the data list that will be dumped into the fixture.
 	dataList.append(tempDict)
